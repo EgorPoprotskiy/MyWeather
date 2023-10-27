@@ -50,4 +50,11 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
 //Библиотека volley отправляет запрос и сразу же будет ожидать ответ
     implementation("com.android.volley:volley:1.2.1")
+//Библиотека, загружающая картинки(picasso более старая, чем coil). В данном проекте используется picasso
+    implementation("com.squareup.picasso:picasso:2.71828")
+    implementation("io.coil-kt:coil:2.2.2")
+//Библиотека, использующая фрагменты
+    implementation("androidx.fragment:fragment-ktx:1.6.1")
+//Библиотека, использующая местоположение
+    implementation("com.google.android.gms:play-services-location:21.0.1")
 }
