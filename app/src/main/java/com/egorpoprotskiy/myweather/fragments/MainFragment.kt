@@ -8,7 +8,10 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.fragment.app.FragmentActivity
+import com.egorpoprotskiy.myweather.adapters.VpAdapter
 import com.egorpoprotskiy.myweather.databinding.FragmentMainBinding
+import com.google.android.material.tabs.TabLayoutMediator
 
 //2 Создание фрагмента
 class MainFragment : Fragment() {
@@ -16,6 +19,16 @@ class MainFragment : Fragment() {
     private lateinit var binding: FragmentMainBinding
     //5 Лаунчер для отображения диалогового окна с вопросом
     private lateinit var pLayncher: ActivityResultLauncher<String>
+    //7 Список для ViewPager2, в него складывает фрагменты(H
+    private val fList = listOf(
+        HoursFragment.newInstance(),
+        DaysFragment.newInstance()
+    )
+    private val tList = listOf(
+        "Hours",
+        "Days"
+    )
+
 
         override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -28,6 +41,15 @@ class MainFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         checkPermission()
+        init()
+    }
+    //7 Привязка адаптера к ViewPager2
+    private fun init() = with(binding){
+        val adapter = VpAdapter(activity as FragmentActivity, fList)
+        vp.adapter = adapter
+        TabLayoutMediator(tabLayout, vp) {
+            tab, pos -> tab.text = tList[pos]
+        }.attach()
     }
 
     //5 Фиксирует результат проверки разрешения на геолокацию(callback)
