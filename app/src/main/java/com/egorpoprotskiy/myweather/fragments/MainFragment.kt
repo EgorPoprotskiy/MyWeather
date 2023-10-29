@@ -19,7 +19,7 @@ class MainFragment : Fragment() {
     private lateinit var binding: FragmentMainBinding
     //5 Лаунчер для отображения диалогового окна с вопросом
     private lateinit var pLayncher: ActivityResultLauncher<String>
-    //7 Список для ViewPager2, в него складывает фрагменты(H
+    //7 Список для ViewPager2, в него складывает фрагменты(Hours и Days)
     private val fList = listOf(
         HoursFragment.newInstance(),
         DaysFragment.newInstance()
