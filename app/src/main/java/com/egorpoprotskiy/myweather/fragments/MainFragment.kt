@@ -107,29 +107,62 @@ class MainFragment : Fragment() {
         queue.add(request)
     }
 
-    //12 Функция по получению данных из JSON-формата
+    //12 Итоговое получение данных из JSON-формата
     private fun parseWeatherData(result: String) {
         //12.1 Создание объекта из JSON-формата(хранит в себе все строки(а именно "Response Body")
         val mainObject = JSONObject(result)
-        //12.2 Вызов конструктора модели данных. Добавление строк в конструктор данных из JSON объекта
+        //13
+        val list = parseDays(mainObject)
+        //12.2 Вызов функции в которой происходит частичное получение данных
+        parseCurrentData(mainObject, list[0])
+    }
+
+    //12 1-я функция по получению данных из JSON-формата(из объектов)(для сегодняшнего дня)
+    private fun parseCurrentData(mainObject: JSONObject, weatherItem: WeatherModel) {
+        //12.3 Вызов конструктора модели данных. Добавление строк в конструктор данных из JSON объекта
         val item = WeatherModel(
             //getJSONObject("location") - получение JSON-объекта с именем "location". getString("name") - получение строки "name" из объекта "location"
             mainObject.getJSONObject("location").getString("name"),
             mainObject.getJSONObject("current").getString("last_updated"),
             mainObject.getJSONObject("current").getJSONObject("condition").getString("text"),
             mainObject.getJSONObject("current").getString("temp_c"),
-            "",
-            "",
+            weatherItem.maxTemp,
+            weatherItem.minTemp,
             mainObject.getJSONObject("current").getJSONObject("condition").getString("icon"),
-            ""
+            weatherItem.hours
         )
         //12 Проверка, что данные получениы верно
-        Log.d("MyLog", "City: ${item.city}")
-        Log.d("MyLog", "Time: ${item.time}")
-        Log.d("MyLog", "Condition: ${item.condition}")
-        Log.d("MyLog", "Temp: ${item.currentTemp}")
-        Log.d("MyLog", "Url: ${item.imageUrl}")
+        Log.d("MyLog", "City: ${item.maxTemp}")
+        Log.d("MyLog", "Time: ${item.minTemp}")
+        Log.d("MyLog", "Time: ${item.hours}")
     }
+
+    //13 2-я функция по получению данных из JSON-формата(из массивов)(для 5-и дней)
+    private fun parseDays(mainObject: JSONObject): List<WeatherModel> {
+        // 13.1 Создание объекта типа ArrayList(массив)
+        val list = ArrayList<WeatherModel>()
+        //13.2 Получение массива с именем "forecastday" из объекта JSON
+        val daysArray = mainObject.getJSONObject("forecast").getJSONArray("forecastday")
+        val name = mainObject.getJSONObject("location").getString("name")
+        //13.3 Создаем цикл по количеству дней(кол-во дней - это длина массива)
+        for (i in 0 until daysArray.length()) {
+            //Следовательно, в каждый из дней будет добавлена ифнформация о погоде из массива "forecastday"
+            val day = daysArray[i] as JSONObject
+            val item = WeatherModel(
+                name,
+                day.getString("date"),
+                day.getJSONObject("day").getJSONObject("condition").getString("text"),
+                "",
+                day.getJSONObject("day").getString("maxtemp_c"),
+                day.getJSONObject("day").getString("mintemp_c"),
+                day.getJSONObject("day").getJSONObject("condition").getString("icon"),
+                day.getJSONArray("hour").toString()
+            )
+            list.add(item)
+        }
+        return list
+    }
+
     companion object {
         @JvmStatic
         fun newInstance() = MainFragment()
