@@ -10,14 +10,17 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentActivity
+import androidx.fragment.app.activityViewModels
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.egorpoprotskiy.myweather.MainViewModel
 import com.egorpoprotskiy.myweather.adapters.VpAdapter
 import com.egorpoprotskiy.myweather.adapters.WeatherAdapter
 import com.egorpoprotskiy.myweather.databinding.FragmentMainBinding
 import com.egorpoprotskiy.myweather.model.WeatherModel
 import com.google.android.material.tabs.TabLayoutMediator
+import com.squareup.picasso.Picasso
 import org.json.JSONObject
 
 const val API_KEY = "e9eec69e30f7493683820453232710"
@@ -36,7 +39,8 @@ class MainFragment : Fragment() {
         "Hours",
         "Days"
     )
-
+    //14.1 Создание объекта ViewModel
+    private val model: MainViewModel by activityViewModels()
 
         override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -44,21 +48,6 @@ class MainFragment : Fragment() {
     ): View {
             binding = FragmentMainBinding.inflate(inflater, container, false)
         return binding.root
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        checkPermission()
-        init()
-        requestWeatherData("London")
-    }
-    //7 Привязка адаптера к ViewPager2
-    private fun init() = with(binding){
-        val adapter = VpAdapter(activity as FragmentActivity, fList)
-        vp.adapter = adapter
-        TabLayoutMediator(tabLayout, vp) {
-            tab, pos -> tab.text = tList[pos]
-        }.attach()
     }
 
     //5 Фиксирует результат проверки разрешения на геолокацию(callback)
@@ -75,6 +64,24 @@ class MainFragment : Fragment() {
             //5 Запуск диалогового окна, если разрешения на геолокацию НЕТ
             pLayncher.launch(android.Manifest.permission.ACCESS_FINE_LOCATION)
         }
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        checkPermission()
+        init()
+        //updateCurrentCard() должна вызываться перед requestWeatherData("London")
+        updateCurrentCard()
+        requestWeatherData("Berlin")
+
+    }
+    //7 Привязка адаптера к ViewPager2
+    private fun init() = with(binding){
+        val adapter = VpAdapter(activity as FragmentActivity, fList)
+        vp.adapter = adapter
+        TabLayoutMediator(tabLayout, vp) {
+                tab, pos -> tab.text = tList[pos]
+        }.attach()
     }
 
     //11 Получение JSON
@@ -131,6 +138,8 @@ class MainFragment : Fragment() {
             mainObject.getJSONObject("current").getJSONObject("condition").getString("icon"),
             weatherItem.hours
         )
+        //14.2 Передаем полученную текущую погоду в liveDataCurrent
+        model.liveDataCurrent.value = item
         //12 Проверка, что данные получениы верно
         Log.d("MyLog", "City: ${item.maxTemp}")
         Log.d("MyLog", "Time: ${item.minTemp}")
@@ -163,6 +172,21 @@ class MainFragment : Fragment() {
         return list
     }
 
+    //14.3 Обсервер для viewModel, который следит за изменениями данных + заполнение всех view
+    private fun updateCurrentCard() = with(binding){
+        //Данные уже получены и сохранены в liveDataCurrent(смотри метод parseCurrentData)
+        model.liveDataCurrent.observe(viewLifecycleOwner) {
+                val maxMinTemp = "${it.maxTemp}C / ${it.minTemp}C"
+            tvData.text = it.time
+            tvCity.text = it.city
+            tvCurrentTemp.text = it.currentTemp
+            tvCondition.text = it.condition
+            tvMaxMin.text = maxMinTemp
+            //Для получения картинки используем библиотеку Picasso
+            Picasso.get().load("https:" + it.imageUrl).into(imWeather)
+
+        }
+    }
     companion object {
         @JvmStatic
         fun newInstance() = MainFragment()
