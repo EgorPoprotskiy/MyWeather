@@ -14,8 +14,11 @@ import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.egorpoprotskiy.myweather.adapters.VpAdapter
+import com.egorpoprotskiy.myweather.adapters.WeatherAdapter
 import com.egorpoprotskiy.myweather.databinding.FragmentMainBinding
+import com.egorpoprotskiy.myweather.model.WeatherModel
 import com.google.android.material.tabs.TabLayoutMediator
+import org.json.JSONObject
 
 const val API_KEY = "e9eec69e30f7493683820453232710"
 //2 Создание фрагмента
@@ -93,16 +96,40 @@ class MainFragment : Fragment() {
             url,
             {
                 //11.3.1 В эту переменную будет сохранен результат(Response Body)(из него будем в дальнейшем брать данные)
-                result -> Log.d("MyLog", "Result: $result")
+                result -> parseWeatherData(result)
+
             },
             {
                 //11.3.2 Если, по какой-то причине, не получим результат, то будет ошибка.
-                error -> Log.d("MyLog", "Errot: $error")
+                error -> Log.d("MyLog", "Error: $error")
             })
         //11.4 Передача запроса в созданную очередь
         queue.add(request)
     }
 
+    //12 Функция по получению данных из JSON-формата
+    private fun parseWeatherData(result: String) {
+        //12.1 Создание объекта из JSON-формата(хранит в себе все строки(а именно "Response Body")
+        val mainObject = JSONObject(result)
+        //12.2 Вызов конструктора модели данных. Добавление строк в конструктор данных из JSON объекта
+        val item = WeatherModel(
+            //getJSONObject("location") - получение JSON-объекта с именем "location". getString("name") - получение строки "name" из объекта "location"
+            mainObject.getJSONObject("location").getString("name"),
+            mainObject.getJSONObject("current").getString("last_updated"),
+            mainObject.getJSONObject("current").getJSONObject("condition").getString("text"),
+            mainObject.getJSONObject("current").getString("temp_c"),
+            "",
+            "",
+            mainObject.getJSONObject("current").getJSONObject("condition").getString("icon"),
+            ""
+        )
+        //12 Проверка, что данные получениы верно
+        Log.d("MyLog", "City: ${item.city}")
+        Log.d("MyLog", "Time: ${item.time}")
+        Log.d("MyLog", "Condition: ${item.condition}")
+        Log.d("MyLog", "Temp: ${item.currentTemp}")
+        Log.d("MyLog", "Url: ${item.imageUrl}")
+    }
     companion object {
         @JvmStatic
         fun newInstance() = MainFragment()
