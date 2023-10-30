@@ -1,6 +1,7 @@
 package com.egorpoprotskiy.myweather.fragments
 
 import android.os.Bundle
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -9,10 +10,14 @@ import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.FragmentActivity
+import com.android.volley.Request
+import com.android.volley.toolbox.StringRequest
+import com.android.volley.toolbox.Volley
 import com.egorpoprotskiy.myweather.adapters.VpAdapter
 import com.egorpoprotskiy.myweather.databinding.FragmentMainBinding
 import com.google.android.material.tabs.TabLayoutMediator
 
+const val API_KEY = "e9eec69e30f7493683820453232710"
 //2 Создание фрагмента
 class MainFragment : Fragment() {
     //2
@@ -42,6 +47,7 @@ class MainFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         checkPermission()
         init()
+        requestWeatherData("London")
     }
     //7 Привязка адаптера к ViewPager2
     private fun init() = with(binding){
@@ -68,6 +74,34 @@ class MainFragment : Fragment() {
         }
     }
 
+    //11 Получение JSON
+    private fun requestWeatherData(city: String) {
+        //11.1 Url - создается на сайте WeatherAPI.com
+        val url = "https://api.weatherapi.com/v1/forecast.json?key=" +
+                API_KEY +
+                "&q=" +
+                //вместо "London" мы вписали переменную city
+                city  +
+                "&days=" +
+                "3" +
+                "&aqi=no&alerts=no"
+        //11.2 Создание очереди
+        val queue = Volley.newRequestQueue(context)
+        //11.3 Создание запроса для оредачи в очередь
+        val request = StringRequest(
+            Request.Method.GET,
+            url,
+            {
+                //11.3.1 В эту переменную будет сохранен результат(Response Body)(из него будем в дальнейшем брать данные)
+                result -> Log.d("MyLog", "Result: $result")
+            },
+            {
+                //11.3.2 Если, по какой-то причине, не получим результат, то будет ошибка.
+                error -> Log.d("MyLog", "Errot: $error")
+            })
+        //11.4 Передача запроса в созданную очередь
+        queue.add(request)
+    }
 
     companion object {
         @JvmStatic
