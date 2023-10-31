@@ -39,7 +39,7 @@ class MainFragment : Fragment() {
         "Hours",
         "Days"
     )
-    //14.1 Создание объекта ViewModel
+    //14.1 Создание объекта ViewModel для MainFragment
     private val model: MainViewModel by activityViewModels()
 
         override fun onCreateView(
@@ -141,9 +141,9 @@ class MainFragment : Fragment() {
         //14.2 Передаем полученную текущую погоду в liveDataCurrent
         model.liveDataCurrent.value = item
         //12 Проверка, что данные получениы верно
-        Log.d("MyLog", "City: ${item.maxTemp}")
-        Log.d("MyLog", "Time: ${item.minTemp}")
-        Log.d("MyLog", "Time: ${item.hours}")
+//        Log.d("MyLog", "City: ${item.maxTemp}")
+//        Log.d("MyLog", "Time: ${item.minTemp}")
+//        Log.d("MyLog", "Time: ${item.hours}")
     }
 
     //13 2-я функция по получению данных из JSON-формата(из массивов)(для 5-и дней)
