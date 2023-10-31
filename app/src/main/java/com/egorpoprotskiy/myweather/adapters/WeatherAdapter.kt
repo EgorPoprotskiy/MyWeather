@@ -20,7 +20,8 @@ class WeatherAdapter: ListAdapter<WeatherModel, WeatherAdapter.WeatherHolder>(Di
             binding.apply {
                 tvDate.text = weatherModel.time
                 tvCondition.text = weatherModel.condition
-                tvTemp.text = weatherModel.currentTemp
+                //ifEmpty - выводит другой вариант текста, если изначально строка пуста
+                tvTemp.text = weatherModel.currentTemp.ifEmpty {"${weatherModel.maxTemp}C / ${weatherModel.minTemp}C"}
                 Picasso.get().load("https:" + weatherModel.imageUrl).into(im)
             }
         }

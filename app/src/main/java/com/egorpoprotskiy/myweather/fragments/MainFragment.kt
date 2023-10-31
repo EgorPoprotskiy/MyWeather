@@ -138,7 +138,7 @@ class MainFragment : Fragment() {
             mainObject.getJSONObject("current").getJSONObject("condition").getString("icon"),
             weatherItem.hours
         )
-        //14.2 Передаем полученную текущую погоду в liveDataCurrent
+        //14.2 Передаем полученную текущую погоду в liveDataCurrent(переменная из MainViewModel)
         model.liveDataCurrent.value = item
         //12 Проверка, что данные получениы верно
 //        Log.d("MyLog", "City: ${item.maxTemp}")
@@ -169,6 +169,8 @@ class MainFragment : Fragment() {
             )
             list.add(item)
         }
+        //передаем эти значение в список(переменная из MainViewModel)
+        model.liveDataList.value = list
         return list
     }
 
