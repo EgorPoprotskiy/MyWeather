@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.egorpoprotskiy.myweather.R
 import com.egorpoprotskiy.myweather.databinding.ListItemBinding
 import com.egorpoprotskiy.myweather.model.WeatherModel
+import com.squareup.picasso.Picasso
 
 //9,10 Создание адаптера для RecyclerView(в видеоуроке очень хорошее объяснение).
 class WeatherAdapter: ListAdapter<WeatherModel, WeatherAdapter.WeatherHolder>(DiffCallback()){
@@ -20,6 +21,7 @@ class WeatherAdapter: ListAdapter<WeatherModel, WeatherAdapter.WeatherHolder>(Di
                 tvDate.text = weatherModel.time
                 tvCondition.text = weatherModel.condition
                 tvTemp.text = weatherModel.currentTemp
+                Picasso.get().load("https:" + weatherModel.imageUrl).into(im)
             }
         }
     }
