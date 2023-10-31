@@ -8,11 +8,11 @@ import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.egorpoprotskiy.myweather.MainViewModel
-import com.egorpoprotskiy.myweather.R
 import com.egorpoprotskiy.myweather.adapters.WeatherAdapter
 import com.egorpoprotskiy.myweather.databinding.FragmentDaysBinding
-
-class DaysFragment : Fragment() {
+import com.egorpoprotskiy.myweather.model.WeatherModel
+//17.3 Добавить интерфейс Listener
+class DaysFragment : Fragment(), WeatherAdapter.Listener {
     private lateinit var binding: FragmentDaysBinding
     private lateinit var adapter: WeatherAdapter
     private val model: MainViewModel by activityViewModels()
@@ -34,7 +34,8 @@ class DaysFragment : Fragment() {
     }
     //16 Адаптер для RecyclerView
     private fun init() = with(binding){
-        adapter = WeatherAdapter()
+        //17.4 В скобках указать фрагмент(после того, как добавили интерфейс Listener в адаптер)
+        adapter = WeatherAdapter(this@DaysFragment)
         rcView.layoutManager = LinearLayoutManager(activity)
         rcView.adapter = adapter
     }
@@ -44,5 +45,9 @@ class DaysFragment : Fragment() {
     companion object {
         @JvmStatic
         fun newInstance() = DaysFragment()
+    }
+
+    override fun onClick(item: WeatherModel) {
+        model.liveDataCurrent.value = item
     }
 }

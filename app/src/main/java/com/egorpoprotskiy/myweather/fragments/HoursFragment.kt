@@ -1,16 +1,13 @@
 package com.egorpoprotskiy.myweather.fragments
 
 import android.os.Bundle
-import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.egorpoprotskiy.myweather.MainViewModel
-import com.egorpoprotskiy.myweather.R
 import com.egorpoprotskiy.myweather.adapters.WeatherAdapter
 import com.egorpoprotskiy.myweather.databinding.FragmentHoursBinding
 import com.egorpoprotskiy.myweather.model.WeatherModel
@@ -41,7 +38,7 @@ class HoursFragment : Fragment() {
     //10 Привязка адаптера к RecyclerView
     private fun initRcView() = with(binding) {
         recyclerView.layoutManager = LinearLayoutManager(activity)
-        adapter = WeatherAdapter()
+        adapter = WeatherAdapter(null)
         recyclerView.adapter = adapter
         //Данный список составлен временно для проверки отбражения данных в RecyclerView
 //        val list = listOf(
