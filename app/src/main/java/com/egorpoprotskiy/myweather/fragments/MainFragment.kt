@@ -162,8 +162,9 @@ class MainFragment : Fragment() {
                 day.getString("date"),
                 day.getJSONObject("day").getJSONObject("condition").getString("text"),
                 "",
-                day.getJSONObject("day").getString("maxtemp_c"),
-                day.getJSONObject("day").getString("mintemp_c"),
+                //17.9 Чтобы убрать десятичную часть, переводим строку из JSON в Float, затем в Int, и потом снова в строку.(При переводе в Int точка уйдет)
+                day.getJSONObject("day").getString("maxtemp_c").toFloat().toInt().toString(),
+                day.getJSONObject("day").getString("mintemp_c").toFloat().toInt().toString(),
                 day.getJSONObject("day").getJSONObject("condition").getString("icon"),
                 day.getJSONArray("hour").toString()
             )
@@ -181,9 +182,11 @@ class MainFragment : Fragment() {
                 val maxMinTemp = "${it.maxTemp}C / ${it.minTemp}C"
             tvData.text = it.time
             tvCity.text = it.city
-            tvCurrentTemp.text = it.currentTemp
+            //17.7 Добавляем макс и мин температуру, если текущая темература пуста(делаем это для отображения температуры при выборе другого дня)
+            tvCurrentTemp.text = it.currentTemp.ifEmpty { maxMinTemp }
             tvCondition.text = it.condition
-            tvMaxMin.text = maxMinTemp
+            //17.8 Если текущая температура не передается, то будет пустая строка, иначе отобразится минимальная и максимальная
+            tvMaxMin.text = if (it.currentTemp.isEmpty()) "" else maxMinTemp
             //Для получения картинки используем библиотеку Picasso
             Picasso.get().load("https:" + it.imageUrl).into(imWeather)
 
