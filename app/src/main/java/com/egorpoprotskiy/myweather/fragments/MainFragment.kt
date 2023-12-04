@@ -24,14 +24,11 @@ import com.android.volley.toolbox.Volley
 import com.egorpoprotskiy.myweather.DialogManager
 import com.egorpoprotskiy.myweather.MainViewModel
 import com.egorpoprotskiy.myweather.adapters.VpAdapter
-import com.egorpoprotskiy.myweather.adapters.WeatherAdapter
 import com.egorpoprotskiy.myweather.databinding.FragmentMainBinding
 import com.egorpoprotskiy.myweather.model.WeatherModel
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
-import com.google.android.gms.tasks.CancellationToken
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
