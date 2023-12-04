@@ -1,5 +1,7 @@
 package com.egorpoprotskiy.myweather.fragments
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import androidx.fragment.app.Fragment
@@ -9,6 +11,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.app.ActivityCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.activityViewModels
 import com.android.volley.Request
@@ -19,6 +22,11 @@ import com.egorpoprotskiy.myweather.adapters.VpAdapter
 import com.egorpoprotskiy.myweather.adapters.WeatherAdapter
 import com.egorpoprotskiy.myweather.databinding.FragmentMainBinding
 import com.egorpoprotskiy.myweather.model.WeatherModel
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
 import org.json.JSONObject
@@ -26,6 +34,8 @@ import org.json.JSONObject
 const val API_KEY = "e9eec69e30f7493683820453232710"
 //2 Создание фрагмента
 class MainFragment : Fragment() {
+    //18.1 Переменная, с помощью которой мы будем получать местоположение...
+    private lateinit var fLocationClient: FusedLocationProviderClient
     //2
     private lateinit var binding: FragmentMainBinding
     //5 Лаунчер для отображения диалогового окна с вопросом
@@ -72,16 +82,46 @@ class MainFragment : Fragment() {
         init()
         //updateCurrentCard() должна вызываться перед requestWeatherData("London")
         updateCurrentCard()
-        requestWeatherData("Berlin")
+//        requestWeatherData("Berlin")
+        //18.4 Вызов метода по определению местоположения
+        getLocation()
 
     }
     //7 Привязка адаптера к ViewPager2
     private fun init() = with(binding){
+        //18.2 инициализация fLocationClient
+        fLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         val adapter = VpAdapter(activity as FragmentActivity, fList)
         vp.adapter = adapter
         TabLayoutMediator(tabLayout, vp) {
                 tab, pos -> tab.text = tList[pos]
         }.attach()
+        //18.5 Вызов метода по нажатию на кнопку обновить
+        ibSync.setOnClickListener {
+            getLocation()
+            //открытие первого tabLayout
+            tabLayout.selectTab(tabLayout.getTabAt(0))
+
+        }
+    }
+
+    //18.3 Функция с помощью которой мы будем получать местоположение
+    private fun getLocation() {
+        val cancellationToken = CancellationTokenSource()
+        //Проверка на разрешение получения локации(нужна для метода getCurrentLocation)
+        if (ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_COARSE_LOCATION
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            return
+        }
+        fLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, cancellationToken.token).addOnCompleteListener{
+            requestWeatherData("${it.result.latitude}, ${it.result.longitude }")
+        }
     }
 
     //11 Получение JSON
