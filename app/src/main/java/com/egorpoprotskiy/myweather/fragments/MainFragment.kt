@@ -113,16 +113,30 @@ class MainFragment : Fragment() {
             checkLocation()
             //открытие первого tabLayout
             tabLayout.selectTab(tabLayout.getTabAt(0))
+        }
+        //20.2 Вызов DialogManger для выбора города
+        ibSearch.setOnClickListener {
+            DialogManager.searchByNameDialog(requireContext(), object : DialogManager.Listener{
+                override fun onClick(name: String?) {
+                    //проверка(приходит ли название города, когда мы его вписываем)
+//                    Log.d("MyLog", "Name: $name")
+                    //название города попадает в метод requestWeatherData
+                    if (name != null) {
+                        requestWeatherData(name)
+                    }
+                }
 
+            })
         }
     }
-    //19.5 Вызов DialogManager
+    //19.5 Вызов DialogManager для включения GPS
     private fun checkLocation() {
         if (isLocationEnable()){
             getLocation()
         } else {
             DialogManager.locationSettingsDialog(requireContext(), object : DialogManager.Listener{
-                override fun onClick() {
+                //19.5 Без аргумента onClick(). В п 20 добавляем аргумент name: String?.
+                override fun onClick(name: String?) {
                     //переход в системные натройки с GPS
                     startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS ))
                 }
@@ -162,7 +176,7 @@ class MainFragment : Fragment() {
     }
 
     //11 Получение JSON
-    private fun requestWeatherData(city: String) {
+    private fun  requestWeatherData(city: String) {
         //11.1 Url - создается на сайте WeatherAPI.com
         val url = "https://api.weatherapi.com/v1/forecast.json?key=" +
                 API_KEY +
