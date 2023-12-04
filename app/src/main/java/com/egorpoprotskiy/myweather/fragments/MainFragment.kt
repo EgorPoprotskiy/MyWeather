@@ -1,8 +1,12 @@
 package com.egorpoprotskiy.myweather.fragments
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.location.LocationManager
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -17,15 +21,14 @@ import androidx.fragment.app.activityViewModels
 import com.android.volley.Request
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.egorpoprotskiy.myweather.DialogManager
 import com.egorpoprotskiy.myweather.MainViewModel
 import com.egorpoprotskiy.myweather.adapters.VpAdapter
-import com.egorpoprotskiy.myweather.adapters.WeatherAdapter
 import com.egorpoprotskiy.myweather.databinding.FragmentMainBinding
 import com.egorpoprotskiy.myweather.model.WeatherModel
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
-import com.google.android.gms.tasks.CancellationToken
+import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import com.google.android.material.tabs.TabLayoutMediator
 import com.squareup.picasso.Picasso
@@ -83,10 +86,18 @@ class MainFragment : Fragment() {
         //updateCurrentCard() должна вызываться перед requestWeatherData("London")
         updateCurrentCard()
 //        requestWeatherData("Berlin")
-        //18.4 Вызов метода по определению местоположения
-        getLocation()
+        //18.4 Вызов метода по определению местоположения(Данный метод запускать не надо после пункта 19, т.к. в onResume вызывается метод checkLocation)
+//        getLocation()
 
     }
+
+    //19.7 В onResume повторно вызываем функцию с проверкой GPS, так как мы переходили на экран с настройками GPS
+    // и затем снова вернулись в приложение, после чего вызывается onResume, где снова идет проверка с включением GPS
+    override fun onResume() {
+        super.onResume()
+        checkLocation()
+    }
+
     //7 Привязка адаптера к ViewPager2
     private fun init() = with(binding){
         //18.2 инициализация fLocationClient
@@ -98,15 +109,40 @@ class MainFragment : Fragment() {
         }.attach()
         //18.5 Вызов метода по нажатию на кнопку обновить
         ibSync.setOnClickListener {
-            getLocation()
+            //19.6 Вызов функции с проверкой на GPS
+            checkLocation()
             //открытие первого tabLayout
             tabLayout.selectTab(tabLayout.getTabAt(0))
 
         }
     }
+    //19.5 Вызов DialogManager
+    private fun checkLocation() {
+        if (isLocationEnable()){
+            getLocation()
+        } else {
+            DialogManager.locationSettingsDialog(requireContext(), object : DialogManager.Listener{
+                override fun onClick() {
+                    //переход в системные натройки с GPS
+                    startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS ))
+                }
+            })
+        }
+    }
+
+    //19.2 Проверка на включенный в телефоне GPS
+    private fun isLocationEnable(): Boolean {
+        val locationManager = activity?.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+        return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
+    }
 
     //18.3 Функция с помощью которой мы будем получать местоположение
     private fun getLocation() {
+        //19.3 Проверка на включенный в телефоне GPS(далее в DialogManager). Данную проверку можно не делать, если мы работаем dialogManager)
+//        if (!isLocationEnable()) {
+//            Toast.makeText(requireContext(), "Location disabled!", Toast.LENGTH_SHORT).show()
+//            return
+//        }
         val cancellationToken = CancellationTokenSource()
         //Проверка на разрешение получения локации(нужна для метода getCurrentLocation)
         if (ActivityCompat.checkSelfPermission(
@@ -119,7 +155,8 @@ class MainFragment : Fragment() {
         ) {
             return
         }
-        fLocationClient.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, cancellationToken.token).addOnCompleteListener{
+        //19.1 Исправлена ошибка с перечеркнутой константой(PRIORITY_HIGH_ACCURACY)
+        fLocationClient.getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, cancellationToken.token).addOnCompleteListener{
             requestWeatherData("${it.result.latitude}, ${it.result.longitude }")
         }
     }
